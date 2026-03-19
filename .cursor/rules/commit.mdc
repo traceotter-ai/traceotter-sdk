@@ -1,0 +1,32 @@
+---
+description: Use a prefix for every git commit message
+alwaysApply: true
+---
+
+# Git commit messages
+
+Always use a conventional commit prefix for every commit. Never commit with an unprefixed message.
+
+- **No bulk commits** — do not bundle unrelated changes into a single commit. Each commit should represent one logical change.
+- **Relevant commits** — group only the files and changes that belong to the same task or fix.
+- **Simple messages** — keep the commit message short and clear. Describe *what* changed, not *how*. Avoid vague messages like `update stuff` or `misc changes`.
+
+| Prefix        | Meaning                 | When to Use                                       | Example                                    |
+| ------------- | ----------------------- | ------------------------------------------------- | ------------------------------------------ |
+| **feat:**     | New feature             | Adding a new capability or functionality          | `feat: add user authentication`            |
+| **fix:**      | Bug fix                 | Fixing a defect or incorrect behavior             | `fix: resolve login validation error`      |
+| **docs:**     | Documentation changes   | Updating README, comments, or docs                | `docs: update API usage guide`             |
+| **style:**    | Code style changes      | Formatting, whitespace, linting (no logic change) | `style: format code with black`            |
+| **refactor:** | Code refactoring        | Improving code without changing behavior          | `refactor: simplify authentication logic`  |
+| **perf:**     | Performance improvement | Optimizing speed or memory usage                  | `perf: improve database query speed`       |
+| **test:**     | Tests                   | Adding or modifying tests                         | `test: add unit tests for payment service` |
+| **build:**    | Build system changes    | Dependencies, build tools, packaging              | `build: update poetry dependencies`        |
+| **ci:**       | CI/CD changes           | GitHub Actions, pipelines, automation             | `ci: add deployment workflow`              |
+| **chore:**    | Maintenance tasks       | Small tasks not affecting code logic              | `chore: update .gitignore`                 |
+| **revert:**   | Reverting a commit      | Undoing previous commit                           | `revert: revert login feature`             |
+| **init:**     | Initial commit          | First commit of repository                        | `init: initial project setup`              |
+| **config:**   | Configuration changes   | Environment configs, settings                     | `config: update environment variables`     |
+| **security:** | Security fixes          | Fix vulnerabilities                               | `security: patch XSS vulnerability`        |
+| **deps:**     | Dependency updates      | Updating libraries/packages                       | `deps: upgrade langchain to v0.2`          |
+| **wip:**      | Work in progress        | Temporary commits not ready for merge             | `wip: experimenting with tracing system`   |
+| **hotfix:**   | Urgent fix              | Production-critical fixes                         | `hotfix: fix production login failure`     |
