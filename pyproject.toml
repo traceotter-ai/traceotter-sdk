@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "traceotter"
+version = "0.1.0"
+description = "Observe AI applications by capturing traces, spans, tool calls, and generations."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "langchain-core==0.3.83",
+  "langchain-openai==0.3.35",
+]
+
+[tool.setuptools.packages.find]
+include = ["traceotter*"]
+
