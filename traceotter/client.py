@@ -288,7 +288,7 @@ _CLIENT_SINGLETON_LOCK = threading.Lock()
 
 
 def _default_exporter() -> Any:
-    secret_key = os.environ.get("TRACEOTTER_SECRET_KEY")
+    secret_key = os.environ.get("TRACEOTTER_API_KEY")
     host = os.environ.get("TRACEOTTER_HOST", "https://api.traceotter.com")
     timeout = int(os.environ.get("TRACEOTTER_TIMEOUT", "5"))
     use_grpc = os.environ.get("TRACEOTTER_USE_GRPC", "").lower() in ("1", "true", "yes")
