@@ -1,18 +1,14 @@
-# Traceotter Python SDK
+# TraceOtter Python SDK
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/traceotter.svg)](https://pypi.org/project/traceotter/)
 
-This is the Python SDK for TraceOtter.
+The TraceOtter Python SDK for LLM/agent observability.
 
-It records what happens in your LLM/agent run (chains, tools, retrieval, generations) and sends the trace data to Traceotter.
+It records traces for chains, tools, retrieval, and generations, and sends them to TraceOtter.
 
-It uses batching, retries, and flush-on-exit, so you can:
-
-- debug broken or slow runs with useful context
-- monitor how your models and tools behave
-- track quality and cost trends over time
+Built with batching, retries, and flush-on-exit to help you debug, monitor, and track quality and cost over time.
 
 ## Installation
 
@@ -29,7 +25,7 @@ export TRACEOTTER_API_KEY="to_your_api_key"
 export TRACEOTTER_HOST="https://api.traceotter.com"  # optional
 ```
 
-### 2) Attach Traceotter callback to your chain/agent
+### 2) Attach TraceOtter callback to your chain/agent
 
 ```python
 from traceotter import get_client
@@ -91,7 +87,7 @@ print(result)
 - **Automatic batching:** spans are buffered and exported in batches.
 - **Safe shutdown flush:** pending spans flush on process exit.
 - **Retries:** HTTP ingestion retries transient failures.
-- **Fallback mode:** without Traceotter credentials, spans are exported to console for local debugging.
+- **Fallback mode:** without TraceOtter credentials, spans are exported to console for local debugging.
 
 ## Environment Variables
 
@@ -105,4 +101,4 @@ print(result)
 - `TRACEOTTER_USE_GRPC`: set `true/1/yes` to enable gRPC target resolution
 - `TRACEOTTER_GRPC_PORT`: gRPC port (default: `50051`)
 
-Note: `OPENAI_API_KEY` is not a Traceotter SDK variable; it is required only by the LangChain/OpenAI examples.
+Note: `OPENAI_API_KEY` is not a TraceOtter SDK variable; it is required only by the LangChain/OpenAI examples.
