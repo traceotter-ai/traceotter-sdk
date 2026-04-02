@@ -1,8 +1,9 @@
 # TraceOtter Python SDK
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyPI](https://img.shields.io/pypi/v/traceotter.svg)](https://pypi.org/project/traceotter/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/traceotter.svg)](https://pypi.org/project/traceotter/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 
 The TraceOtter Python SDK for LLM/agent observability.
 
@@ -11,6 +12,8 @@ It records traces for chains, tools, retrieval, and generations, and sends them 
 Built with batching, retries, and flush-on-exit to help you debug, monitor, and track quality and cost over time.
 
 ## Installation
+
+Requires **Python 3.11+** (see `requires-python` in `pyproject.toml`).
 
 ```bash
 pip install traceotter
