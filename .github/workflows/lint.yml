@@ -1,0 +1,27 @@
+name: Lint & Format
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ruff lint
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.0"
+          args: check
+
+      - name: Ruff format check
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "0.15.0"
+          args: format --check
