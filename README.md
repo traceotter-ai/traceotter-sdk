@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/traceotter.svg)](https://pypi.org/project/traceotter/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/traceotter.svg)](https://pypi.org/project/traceotter/)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 
 The TraceOtter Python SDK for LLM/agent observability.
 
@@ -13,7 +13,7 @@ Built with batching, retries, and flush-on-exit to help you debug, monitor, and 
 
 ## Installation
 
-Requires **Python 3.9+** (see `requires-python` in `pyproject.toml`).
+Requires **Python 3.11+** (see `requires-python` in `pyproject.toml`).
 
 ```bash
 pip install traceotter
