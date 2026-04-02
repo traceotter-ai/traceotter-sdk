@@ -55,7 +55,9 @@ def _normalize_start_time(value: Any) -> float:
                 return dt.timestamp()
             except Exception as exc:  # noqa: BLE001
                 raise SchemaValidationError("Invalid start_time format") from exc
-    raise SchemaValidationError("start_time is required and must be numeric or ISO-8601")
+    raise SchemaValidationError(
+        "start_time is required and must be numeric or ISO-8601"
+    )
 
 
 def validate_span_schema(span: dict[str, Any]) -> RawSpan:
@@ -89,4 +91,3 @@ def validate_span_schema(span: dict[str, Any]) -> RawSpan:
         attributes=attributes,
         context=context,
     )
-

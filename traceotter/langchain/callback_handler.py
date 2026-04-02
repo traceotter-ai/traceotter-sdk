@@ -8,16 +8,6 @@ from uuid import uuid4
 
 from langchain_core.callbacks.base import BaseCallbackHandler
 
-from traceotter.attributes import (
-    TraceotterOtelSpanAttributes,
-    create_generation_attributes,
-    create_span_attributes,
-    create_trace_attributes,
-    join_tags_and_metadata,
-    parse_trace_attributes_from_metadata,
-)
-from traceotter.client import TraceotterClient, get_client, now_ns
-from traceotter.models import OTelEvent, OTelSpanPayload
 from traceotter._utils.serializer import (
     parse_model_from_response,
     parse_model_name_from_metadata,
@@ -28,6 +18,16 @@ from traceotter._utils.serializer import (
     serialize_messages_batch,
     to_gen_ai_usage_attributes,
 )
+from traceotter.attributes import (
+    TraceotterOtelSpanAttributes,
+    create_generation_attributes,
+    create_span_attributes,
+    create_trace_attributes,
+    join_tags_and_metadata,
+    parse_trace_attributes_from_metadata,
+)
+from traceotter.client import TraceotterClient, get_client, now_ns
+from traceotter.models import OTelEvent, OTelSpanPayload
 
 
 @dataclass
@@ -47,7 +47,9 @@ try:
 except Exception:
     pass
 
-_CURRENT_RUN_ID: ContextVar[str | None] = ContextVar("traceotter_current_run_id", default=None)
+_CURRENT_RUN_ID: ContextVar[str | None] = ContextVar(
+    "traceotter_current_run_id", default=None
+)
 
 
 class CallbackHandler(BaseCallbackHandler):
@@ -133,7 +135,9 @@ class CallbackHandler(BaseCallbackHandler):
         if run_id_str is None or parent_run_id_str is None:
             return
 
-        traceotter_prompt = metadata.get("traceotter_prompt") if isinstance(metadata, dict) else None
+        traceotter_prompt = (
+            metadata.get("traceotter_prompt") if isinstance(metadata, dict) else None
+        )
         if traceotter_prompt:
             self._prompt_to_parent_run_map[parent_run_id_str] = traceotter_prompt
         elif parent_run_id_str in self._prompt_to_parent_run_map:
@@ -230,7 +234,9 @@ class CallbackHandler(BaseCallbackHandler):
 
         run.payload.end_time_unix_nano = now_ns()
         run.payload.status_code = "ERROR"
-        is_control_flow = any(isinstance(error, t) for t in CONTROL_FLOW_EXCEPTION_TYPES)
+        is_control_flow = any(
+            isinstance(error, t) for t in CONTROL_FLOW_EXCEPTION_TYPES
+        )
         run.payload.status_message = str(error) if not is_control_flow else None
         run.payload.attributes["error.type"] = type(error).__name__
         run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_LEVEL] = (
@@ -246,9 +252,9 @@ class CallbackHandler(BaseCallbackHandler):
                 if isinstance(input_payload, str)
                 else safe_json_dumps(input_payload)
             )
-        run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_COST_DETAILS] = (
-            safe_json_dumps({"total": 0})
-        )
+        run.payload.attributes[
+            TraceotterOtelSpanAttributes.OBSERVATION_COST_DETAILS
+        ] = safe_json_dumps({"total": 0})
         run.payload.events.append(
             OTelEvent(
                 name="exception",
@@ -311,7 +317,9 @@ class CallbackHandler(BaseCallbackHandler):
             input_payload=inputs,
         )
 
-    def on_chain_end(self, outputs: dict[str, Any], *, run_id: Any, **kwargs: Any) -> None:
+    def on_chain_end(
+        self, outputs: dict[str, Any], *, run_id: Any, **kwargs: Any
+    ) -> None:
         if self.update_trace:
             run = self._runs.get(self._string_id(run_id) or "")
             if run:
@@ -319,7 +327,9 @@ class CallbackHandler(BaseCallbackHandler):
         self._end_run(run_id=run_id, output_payload=outputs)
         self._deregister_traceotter_prompt(run_id)
 
-    def on_chain_error(self, error: BaseException, *, run_id: Any, **kwargs: Any) -> None:
+    def on_chain_error(
+        self, error: BaseException, *, run_id: Any, **kwargs: Any
+    ) -> None:
         self._error_run(run_id=run_id, error=error, input_payload=kwargs.get("inputs"))
 
     def on_llm_new_token(
@@ -335,7 +345,9 @@ class CallbackHandler(BaseCallbackHandler):
         if run and run_key not in self._updated_completion_start_time_memo:
             run.payload.attributes[
                 TraceotterOtelSpanAttributes.OBSERVATION_COMPLETION_START_TIME
-            ] = safe_json_dumps(datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"))
+            ] = safe_json_dumps(
+                datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            )
             self._updated_completion_start_time_memo.add(run_key)
 
     def on_chat_model_start(
@@ -398,7 +410,9 @@ class CallbackHandler(BaseCallbackHandler):
     ) -> None:
         model = None
         if invocation_params:
-            model = invocation_params.get("model") or invocation_params.get("model_name")
+            model = invocation_params.get("model") or invocation_params.get(
+                "model_name"
+            )
         if model is None:
             model = parse_model_name_from_metadata(metadata)
         span_metadata = join_tags_and_metadata(
@@ -465,7 +479,9 @@ class CallbackHandler(BaseCallbackHandler):
             model = parse_model_from_response(response)
             if model:
                 run.payload.attributes["gen_ai.response.model"] = model
-                run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_MODEL] = model
+                run.payload.attributes[
+                    TraceotterOtelSpanAttributes.OBSERVATION_MODEL
+                ] = model
 
         self._end_run(run_id=run_id, output_payload=_extract_llm_response(response))
         self._updated_completion_start_time_memo.discard(run_key)
@@ -513,7 +529,9 @@ class CallbackHandler(BaseCallbackHandler):
     def on_tool_end(self, output: Any, *, run_id: Any, **kwargs: Any) -> None:
         self._end_run(run_id=run_id, output_payload=output)
 
-    def on_tool_error(self, error: BaseException, *, run_id: Any, **kwargs: Any) -> None:
+    def on_tool_error(
+        self, error: BaseException, *, run_id: Any, **kwargs: Any
+    ) -> None:
         self._error_run(run_id=run_id, error=error, input_payload=kwargs.get("inputs"))
 
     def on_retriever_start(
@@ -552,10 +570,14 @@ class CallbackHandler(BaseCallbackHandler):
             input_payload={"query": query},
         )
 
-    def on_retriever_end(self, documents: list[Any], *, run_id: Any, **kwargs: Any) -> None:
+    def on_retriever_end(
+        self, documents: list[Any], *, run_id: Any, **kwargs: Any
+    ) -> None:
         self._end_run(run_id=run_id, output_payload=serialize_documents(documents))
 
-    def on_retriever_error(self, error: BaseException, *, run_id: Any, **kwargs: Any) -> None:
+    def on_retriever_error(
+        self, error: BaseException, *, run_id: Any, **kwargs: Any
+    ) -> None:
         self._error_run(run_id=run_id, error=error, input_payload=kwargs.get("inputs"))
 
     def on_agent_action(
@@ -568,7 +590,9 @@ class CallbackHandler(BaseCallbackHandler):
     ) -> Any:
         run = self._runs.get(self._string_id(run_id) or "")
         if run:
-            run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_TYPE] = "agent"
+            run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_TYPE] = (
+                "agent"
+            )
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_OUTPUT] = (
                 action if isinstance(action, str) else safe_json_dumps(action)
             )
@@ -590,7 +614,9 @@ class CallbackHandler(BaseCallbackHandler):
     ) -> Any:
         run = self._runs.get(self._string_id(run_id) or "")
         if run:
-            run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_TYPE] = "agent"
+            run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_TYPE] = (
+                "agent"
+            )
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_OUTPUT] = (
                 finish if isinstance(finish, str) else safe_json_dumps(finish)
             )
@@ -679,7 +705,8 @@ def _extract_llm_response(response: Any) -> Any:
             message = getattr(last_response, "message", None)
             if message is not None:
                 return {
-                    "role": getattr(message, "type", None) or getattr(message, "role", None),
+                    "role": getattr(message, "type", None)
+                    or getattr(message, "role", None),
                     "content": getattr(message, "content", None),
                     "additional_kwargs": getattr(message, "additional_kwargs", None),
                 }
@@ -689,4 +716,3 @@ def _extract_llm_response(response: Any) -> Any:
                 if stripped:
                     return stripped
     return response
-

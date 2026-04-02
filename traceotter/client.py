@@ -16,8 +16,8 @@ from traceotter._utils.request import (
     grpc_target_from_base_url,
     order_spans_parents_first,
 )
-from traceotter.models import OTelEvent, OTelSpanPayload
 from traceotter._utils.serializer import safe_json_dumps
+from traceotter.models import OTelEvent, OTelSpanPayload
 
 log = logging.getLogger("traceotter")
 
@@ -160,7 +160,9 @@ class TraceotterClient:
             if env_flush_interval is not None:
                 resolved_flush_interval_seconds = float(env_flush_interval)
             elif env_otel_flush_interval_ms is not None:
-                resolved_flush_interval_seconds = float(env_otel_flush_interval_ms) / 1000.0
+                resolved_flush_interval_seconds = (
+                    float(env_otel_flush_interval_ms) / 1000.0
+                )
             else:
                 resolved_flush_interval_seconds = 5.0
 
@@ -201,7 +203,9 @@ class TraceotterClient:
         for batch in remaining_batches:
             if batch:
                 raw_spans = [_to_raw_span(span) for span in batch]
-                self._exporter.export([{"spans": [{"details": span} for span in raw_spans]}])
+                self._exporter.export(
+                    [{"spans": [{"details": span} for span in raw_spans]}]
+                )
 
     def shutdown(self) -> None:
         if self._stop_event.is_set():
@@ -251,7 +255,9 @@ class TraceotterClient:
                 self._last_flush_monotonic = now
                 return
 
-            interval_elapsed = (now - self._last_flush_monotonic) >= self._flush_interval_seconds
+            interval_elapsed = (
+                now - self._last_flush_monotonic
+            ) >= self._flush_interval_seconds
             reached_batch_size = len(self._ready_batch) >= self._batch_size
             if not force and not interval_elapsed and not reached_batch_size:
                 return
@@ -262,7 +268,9 @@ class TraceotterClient:
 
         if batch:
             raw_spans = [_to_raw_span(span) for span in batch]
-            self._exporter.export([{"spans": [{"details": span} for span in raw_spans]}])
+            self._exporter.export(
+                [{"spans": [{"details": span} for span in raw_spans]}]
+            )
 
     @staticmethod
     def _encode(payload: OTelSpanPayload) -> dict[str, Any]:
@@ -277,7 +285,9 @@ class TraceotterClient:
             "status_code": payload.status_code,
             "status_message": payload.status_message,
             "attributes": payload.attributes,
-            "events": [TraceotterClient._encode_event(event) for event in payload.events],
+            "events": [
+                TraceotterClient._encode_event(event) for event in payload.events
+            ],
         }
 
     @staticmethod
@@ -328,4 +338,3 @@ def get_client(
                 flush_interval_seconds=flush_interval_seconds,
             )
     return _CLIENT_SINGLETON
-

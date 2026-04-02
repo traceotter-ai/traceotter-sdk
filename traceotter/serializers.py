@@ -50,7 +50,9 @@ def parse_model_parameters(invocation_params: dict[str, Any] | None) -> dict[str
         return {}
 
     params = dict(invocation_params)
-    if params.get("_type") == "IBM watsonx.ai" and isinstance(params.get("params"), dict):
+    if params.get("_type") == "IBM watsonx.ai" and isinstance(
+        params.get("params"), dict
+    ):
         merged = dict(params)
         merged.update(params["params"])
         merged.pop("params", None)
@@ -125,7 +127,11 @@ def _parse_usage_model(usage: Any) -> dict[str, int] | None:
         if isinstance(details, list):
             usage_model.pop(input_key, None)
             for item in details:
-                if isinstance(item, dict) and "modality" in item and "token_count" in item:
+                if (
+                    isinstance(item, dict)
+                    and "modality" in item
+                    and "token_count" in item
+                ):
                     usage_model[f"{prefix}{item['modality']}"] = item["token_count"]
 
     usage_ints = {k: v for k, v in usage_model.items() if isinstance(v, int)}
@@ -149,7 +155,9 @@ def parse_usage(response: Any) -> dict[str, int] | None:
                 continue
             for chunk in generation:
                 generation_info = getattr(chunk, "generation_info", None)
-                if isinstance(generation_info, dict) and generation_info.get("usage_metadata"):
+                if isinstance(generation_info, dict) and generation_info.get(
+                    "usage_metadata"
+                ):
                     parsed = _parse_usage_model(generation_info["usage_metadata"])
                     if parsed:
                         llm_usage = parsed
@@ -159,9 +167,9 @@ def parse_usage(response: Any) -> dict[str, int] | None:
                 response_metadata = getattr(message, "response_metadata", None)
                 chunk_usage = None
                 if isinstance(response_metadata, dict):
-                    chunk_usage = response_metadata.get("usage") or response_metadata.get(
-                        "amazon-bedrock-invocationMetrics"
-                    )
+                    chunk_usage = response_metadata.get(
+                        "usage"
+                    ) or response_metadata.get("amazon-bedrock-invocationMetrics")
                 chunk_usage = chunk_usage or getattr(message, "usage_metadata", None)
                 if chunk_usage:
                     parsed = _parse_usage_model(chunk_usage)
@@ -194,4 +202,3 @@ def to_gen_ai_usage_attributes(usage: dict[str, int] | None) -> dict[str, int]:
     if isinstance(usage.get("total"), int):
         attrs["gen_ai.usage.total_tokens"] = usage["total"]
     return attrs
-

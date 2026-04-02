@@ -27,7 +27,9 @@ class APIErrors(Exception):
 
 
 def grpc_target_from_base_url(base_url: str, port: int = 50051) -> str:
-    parsed = urllib.parse.urlparse(base_url if "://" in base_url else f"https://{base_url}")
+    parsed = urllib.parse.urlparse(
+        base_url if "://" in base_url else f"https://{base_url}"
+    )
     host = parsed.hostname or parsed.path or "localhost"
     return f"{host}:{port}"
 
@@ -177,7 +179,9 @@ class TraceotterHttpIngestClient:
             from traceotter.proto.v1 import traceotter_pb2_grpc
 
             self._grpc_channel = grpc.insecure_channel(self._grpc_target)
-            self._grpc_stub = traceotter_pb2_grpc.TraceOtterServiceStub(self._grpc_channel)
+            self._grpc_stub = traceotter_pb2_grpc.TraceOtterServiceStub(
+                self._grpc_channel
+            )
         return self._grpc_stub
 
     @staticmethod
@@ -185,13 +189,17 @@ class TraceotterHttpIngestClient:
         if value is None or isinstance(value, (bool, int, float, str)):
             return value
         if isinstance(value, dict):
-            return {k: TraceotterHttpIngestClient._struct_safe_value(v) for k, v in value.items()}
+            return {
+                k: TraceotterHttpIngestClient._struct_safe_value(v)
+                for k, v in value.items()
+            }
         if isinstance(value, (list, tuple)):
             return [TraceotterHttpIngestClient._struct_safe_value(v) for v in value]
         return str(value)
 
     def _raw_span_to_grpc_span(self, raw: RawSpan) -> Any:
         from google.protobuf.json_format import ParseDict
+
         from traceotter.proto.v1 import traceotter_pb2
 
         span = traceotter_pb2.Span()
@@ -244,7 +252,9 @@ class TraceotterHttpIngestClient:
         stub = self._get_grpc_stub()
         try:
             stub.IngestSpans(
-                request, metadata=self._grpc_metadata(), timeout=self._timeout_seconds or 20
+                request,
+                metadata=self._grpc_metadata(),
+                timeout=self._timeout_seconds or 20,
             )
         except grpc.RpcError as exc:
             code = exc.code()
@@ -264,7 +274,9 @@ class TraceotterHttpIngestClient:
             if isinstance(errors, list) and errors:
                 raise APIErrors(
                     [
-                        APIError(err.get("status", resp.status_code), err.get("message", err))
+                        APIError(
+                            err.get("status", resp.status_code), err.get("message", err)
+                        )
                         for err in errors
                         if isinstance(err, dict)
                     ]
@@ -275,4 +287,3 @@ class TraceotterHttpIngestClient:
         except Exception:  # noqa: BLE001
             payload = resp.text
         raise APIError(resp.status_code, payload)
-

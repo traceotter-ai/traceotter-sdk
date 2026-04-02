@@ -27,4 +27,3 @@ class OTelSpanPayload:
     status_message: str | None = None
     attributes: dict[str, Any] = field(default_factory=dict)
     events: list[OTelEvent] = field(default_factory=list)
-

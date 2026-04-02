@@ -149,7 +149,9 @@ def create_generation_attributes(
         TraceotterOtelSpanAttributes.OBSERVATION_MODEL: model,
         TraceotterOtelSpanAttributes.OBSERVATION_PROMPT_NAME: prompt_name,
         TraceotterOtelSpanAttributes.OBSERVATION_PROMPT_VERSION: prompt_version,
-        TraceotterOtelSpanAttributes.OBSERVATION_USAGE_DETAILS: _serialize(usage_details),
+        TraceotterOtelSpanAttributes.OBSERVATION_USAGE_DETAILS: _serialize(
+            usage_details
+        ),
         TraceotterOtelSpanAttributes.OBSERVATION_COST_DETAILS: _serialize(cost_details),
         TraceotterOtelSpanAttributes.OBSERVATION_COMPLETION_START_TIME: _serialize(
             completion_start_time
@@ -162,7 +164,9 @@ def create_generation_attributes(
     return {key: value for key, value in attributes.items() if value is not None}
 
 
-def parse_trace_attributes_from_metadata(metadata: dict[str, Any] | None) -> dict[str, Any]:
+def parse_trace_attributes_from_metadata(
+    metadata: dict[str, Any] | None,
+) -> dict[str, Any]:
     attributes: dict[str, Any] = {}
     if not isinstance(metadata, dict):
         return attributes
@@ -179,7 +183,9 @@ def parse_trace_attributes_from_metadata(metadata: dict[str, Any] | None) -> dic
 
     raw_tags = metadata.get("traceotter_tags")
     if isinstance(raw_tags, list):
-        attributes[TraceotterOtelSpanAttributes.TRACE_TAGS] = [str(tag) for tag in raw_tags]
+        attributes[TraceotterOtelSpanAttributes.TRACE_TAGS] = [
+            str(tag) for tag in raw_tags
+        ]
 
     return attributes
 
@@ -226,4 +232,3 @@ def join_tags_and_metadata(
         combined,
         keep_traceotter_trace_attributes=keep_traceotter_trace_attributes,
     )
-
