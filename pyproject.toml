@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "traceotter"
-version = "0.2.4"
+version = "0.2.5"
 description = "Production observability SDK for LLM apps and LangChain agents with OpenTelemetry-style tracing and low-friction callbacks."
 license = { file = "LICENSE" }
 readme = "README.md"

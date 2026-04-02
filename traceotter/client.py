@@ -66,7 +66,7 @@ class HttpIngestExporter:
         secret_key: str,
         host: str,
         timeout_seconds: int = 5,
-        version: str = "0.2.4",
+        version: str = "0.2.5",
         max_retries: int = 3,
         public_key: str | None = None,
         grpc_target: str | None = None,
