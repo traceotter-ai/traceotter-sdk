@@ -1,0 +1,9 @@
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Uncomment and set your GitHub username or @org/team (teams need write access):
+# * @your-github-username
+#
+# Optional path-specific owners, e.g. CI vs library:
+# /.github/ @your-github-username
+# /traceotter/ @your-github-username
+# /tests/ @your-github-username
