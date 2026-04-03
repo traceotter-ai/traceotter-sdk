@@ -22,6 +22,10 @@ from traceotter.models import OTelEvent, OTelSpanPayload
 log = logging.getLogger("traceotter")
 
 
+class TraceotterConfigurationError(ValueError):
+    """Raised when required TraceOtter client configuration is missing (e.g. API key)."""
+
+
 def now_ns() -> int:
     return time.time_ns()
 
@@ -308,20 +312,26 @@ _CLIENT_SINGLETON_LOCK = threading.Lock()
 
 
 def _default_exporter() -> Any:
-    secret_key = os.environ.get("TRACEOTTER_API_KEY")
+    raw_key = os.environ.get("TRACEOTTER_API_KEY")
+    if not (isinstance(raw_key, str) and raw_key.strip()):
+        raise TraceotterConfigurationError(
+            "TRACEOTTER_API_KEY is not set or is empty. Set it in the environment to "
+            "send traces to TraceOtter, or pass exporter=... to TraceotterClient or "
+            "get_client() (e.g. traceotter.client.ConsoleExporter() only if you "
+            "explicitly want JSON printed to stdout)."
+        )
+    secret_key = raw_key.strip()
     host = os.environ.get("TRACEOTTER_HOST", "https://api.traceotter.com")
     timeout = int(os.environ.get("TRACEOTTER_TIMEOUT", "5"))
     use_grpc = os.environ.get("TRACEOTTER_USE_GRPC", "").lower() in ("1", "true", "yes")
     grpc_port = int(os.environ.get("TRACEOTTER_GRPC_PORT", "50051"))
     grpc_target = grpc_target_from_base_url(host, grpc_port) if use_grpc else None
-    if secret_key:
-        return HttpIngestExporter(
-            secret_key=secret_key,
-            host=host,
-            timeout_seconds=timeout,
-            grpc_target=grpc_target,
-        )
-    return ConsoleExporter()
+    return HttpIngestExporter(
+        secret_key=secret_key,
+        host=host,
+        timeout_seconds=timeout,
+        grpc_target=grpc_target,
+    )
 
 
 def get_client(

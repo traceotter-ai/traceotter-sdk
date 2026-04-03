@@ -90,11 +90,11 @@ print(result)
 - **Automatic batching:** spans are buffered and exported in batches.
 - **Safe shutdown flush:** pending spans flush on process exit.
 - **Retries:** HTTP ingestion retries transient failures.
-- **Fallback mode:** without TraceOtter credentials, spans are exported to console for local debugging.
+- **API key required:** `get_client()` / `TraceotterClient()` without a custom `exporter` require `TRACEOTTER_API_KEY`; if it is missing, a `TraceotterConfigurationError` is raised (traces are not printed to the console by default).
 
 ## Environment Variables
 
-- `TRACEOTTER_API_KEY`: required for remote ingest (`to_...`)
+- `TRACEOTTER_API_KEY`: **required** for default remote ingest (`to_...`), unless you pass a custom `exporter` to the client
 - `TRACEOTTER_HOST`: API base URL (default: `https://api.traceotter.com`)
 - `TRACEOTTER_TIMEOUT`: request timeout seconds (default: `5`)
 - `TRACEOTTER_FLUSH_AT`: max spans per flush batch
