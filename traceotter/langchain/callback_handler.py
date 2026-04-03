@@ -16,6 +16,7 @@ from traceotter._utils.serializer import (
     safe_json_dumps,
     safe_serialize_observation,
     serialize_documents,
+    serialize_dict,
     serialize_messages_batch,
     to_gen_ai_usage_attributes,
 )
@@ -190,7 +191,7 @@ class CallbackHandler(BaseCallbackHandler):
                 OTelEvent(
                     name="gen_ai.client.inference.operation.details",
                     timestamp_unix_nano=now_ns(),
-                    attributes={"traceotter.input": safe_json_dumps(input_payload)},
+                    attributes={"traceotter.input": serialize_dict(input_payload)},
                 )
             )
 
@@ -211,13 +212,13 @@ class CallbackHandler(BaseCallbackHandler):
         run.payload.status_code = "OK"
         if output_payload is not None:
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_OUTPUT] = (
-                safe_serialize_observation(output_payload)
+                serialize_dict(output_payload)
             )
             run.payload.events.append(
                 OTelEvent(
                     name="traceotter.output",
                     timestamp_unix_nano=now_ns(),
-                    attributes={"traceotter.output": safe_json_dumps(output_payload)},
+                    attributes={"traceotter.output": serialize_dict(output_payload)},
                 )
             )
         self.client.enqueue_span(run.payload)
@@ -249,7 +250,7 @@ class CallbackHandler(BaseCallbackHandler):
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_INPUT] = (
                 input_payload
                 if isinstance(input_payload, str)
-                else safe_json_dumps(input_payload)
+                else serialize_dict(input_payload)
             )
         run.payload.attributes[
             TraceotterOtelSpanAttributes.OBSERVATION_COST_DETAILS
@@ -286,7 +287,7 @@ class CallbackHandler(BaseCallbackHandler):
         observation_type = self._get_observation_type_from_serialized(
             serialized, "chain", **kwargs
         )
-        input_serialized = safe_serialize_observation(inputs)
+        input_serialized = serialize_dict(inputs)
         attributes = create_span_attributes(
             metadata=span_metadata,
             input=input_serialized,
@@ -327,7 +328,7 @@ class CallbackHandler(BaseCallbackHandler):
             if run:
                 run.payload.attributes[
                     TraceotterOtelSpanAttributes.OBSERVATION_INPUT
-                ] = safe_serialize_observation(resolved_inputs)
+                ] = serialize_dict(resolved_inputs)
         if self.update_trace:
             run = self._runs.get(run_id_str)
             if run:
@@ -605,7 +606,7 @@ class CallbackHandler(BaseCallbackHandler):
             if resolved_inputs is not None:
                 run.payload.attributes[
                     TraceotterOtelSpanAttributes.OBSERVATION_INPUT
-                ] = safe_serialize_observation(resolved_inputs)
+                ] = serialize_dict(resolved_inputs)
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_OUTPUT] = (
                 safe_serialize_observation(action)
             )
@@ -634,7 +635,7 @@ class CallbackHandler(BaseCallbackHandler):
             if resolved_inputs is not None:
                 run.payload.attributes[
                     TraceotterOtelSpanAttributes.OBSERVATION_INPUT
-                ] = safe_serialize_observation(resolved_inputs)
+                ] = serialize_dict(resolved_inputs)
             run.payload.attributes[TraceotterOtelSpanAttributes.OBSERVATION_OUTPUT] = (
                 safe_serialize_observation(finish)
             )

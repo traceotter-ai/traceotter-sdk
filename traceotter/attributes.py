@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 from typing import Any
 
+from traceotter.serializers import serialize_dict
+
 
 class TraceotterOtelSpanAttributes:
     # Trace-level attributes
@@ -92,7 +94,9 @@ def create_trace_attributes(
         TraceotterOtelSpanAttributes.VERSION: version,
         TraceotterOtelSpanAttributes.RELEASE: release,
         TraceotterOtelSpanAttributes.TRACE_INPUT: _serialize(input),
-        TraceotterOtelSpanAttributes.TRACE_OUTPUT: _serialize(output),
+        TraceotterOtelSpanAttributes.TRACE_OUTPUT: (
+            None if output is None else serialize_dict(output)
+        ),
         TraceotterOtelSpanAttributes.TRACE_TAGS: tags,
         TraceotterOtelSpanAttributes.TRACE_PUBLIC: public,
         **_flatten_and_serialize_metadata(metadata, "trace"),

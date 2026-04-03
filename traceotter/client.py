@@ -38,7 +38,7 @@ def _to_raw_span(span: dict[str, Any]) -> dict[str, Any]:
     if parent_span_id is not None:
         attributes.setdefault("parent_span_id", str(parent_span_id))
 
-    return {
+    raw: dict[str, Any] = {
         "trace_id": trace_id or None,
         "id": span_id or None,
         "span_id": span_id or None,
@@ -50,6 +50,10 @@ def _to_raw_span(span: dict[str, Any]) -> dict[str, Any]:
         "attributes": attributes,
         "context": {},
     }
+    name = span.get("name")
+    if isinstance(name, str):
+        raw["name"] = name
+    return raw
 
 
 class ConsoleExporter:

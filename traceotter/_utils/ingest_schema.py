@@ -12,6 +12,7 @@ class RawSpan(TypedDict, total=False):
     trace_id: str
     id: str
     span_id: str
+    name: str
     start_time: float | str
     attributes: dict[str, Any]
     context: dict[str, Any]
@@ -83,7 +84,7 @@ def validate_span_schema(span: dict[str, Any]) -> RawSpan:
     if not isinstance(context, dict):
         raise SchemaValidationError("context must be a dictionary")
 
-    return RawSpan(
+    validated = RawSpan(
         trace_id=trace_id,
         id=span.get("id") or span_id,
         span_id=span_id,
@@ -91,3 +92,7 @@ def validate_span_schema(span: dict[str, Any]) -> RawSpan:
         attributes=attributes,
         context=context,
     )
+    span_name = span.get("name")
+    if isinstance(span_name, str):
+        validated["name"] = span_name
+    return validated

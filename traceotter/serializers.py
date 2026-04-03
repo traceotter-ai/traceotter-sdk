@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from typing import Any
 
 
@@ -11,10 +12,65 @@ def safe_json_dumps(value: Any) -> str:
         return json.dumps({"unserializable": str(value)}, ensure_ascii=True)
 
 
+def _serialize_agent_action_for_step(action: Any) -> Any:
+    if isinstance(action, (str, int, float, bool)) or action is None:
+        return action
+    model_dump = getattr(action, "model_dump", None)
+    if callable(model_dump):
+        try:
+            return model_dump()
+        except (TypeError, ValueError):
+            pass
+    dict_method = getattr(action, "dict", None)
+    if callable(dict_method):
+        try:
+            return dict_method()
+        except (TypeError, ValueError):
+            pass
+    if hasattr(action, "__dict__"):
+        try:
+            return vars(action)
+        except TypeError:
+            pass
+    return str(action)
+
+
+def serialize_intermediate_steps(steps: Any) -> Any:
+    """Normalize AgentAction objects inside intermediate_steps for JSON."""
+    if not isinstance(steps, list):
+        return steps
+    result: list[Any] = []
+    for step in steps:
+        if isinstance(step, (list, tuple)) and len(step) >= 2:
+            action, observation = step[0], step[1]
+            action_dict = _serialize_agent_action_for_step(action)
+            result.append([action_dict, observation])
+        else:
+            result.append(step)
+    return result
+
+
+def _serialize_mapping_for_spans(obj: Mapping[Any, Any]) -> str:
+    """Normalize intermediate_steps then JSON-encode mapping data (dict, AddableDict, UserDict, …)."""
+    cleaned = dict(obj)
+    if "intermediate_steps" in cleaned:
+        cleaned["intermediate_steps"] = serialize_intermediate_steps(
+            cleaned["intermediate_steps"]
+        )
+    try:
+        return json.dumps(cleaned, ensure_ascii=True, default=str)
+    except (TypeError, ValueError):
+        return str(cleaned)
+
+
 def safe_serialize_observation(obj: Any) -> str:
     """Serialize LangChain / runtime values to a JSON string for span attributes."""
+    if isinstance(obj, str):
+        return obj
     if obj is None:
         return "null"
+    if isinstance(obj, Mapping) and not isinstance(obj, (str, bytes)):
+        return _serialize_mapping_for_spans(obj)
     model_dump = getattr(obj, "model_dump", None)
     if callable(model_dump):
         try:
@@ -36,6 +92,15 @@ def safe_serialize_observation(obj: Any) -> str:
         return json.dumps(obj, ensure_ascii=True, default=str)
     except (TypeError, ValueError):
         return str(obj)
+
+
+def serialize_dict(obj: Any) -> str:
+    """Serialize chain/agent inputs and outputs; expands intermediate_steps AgentActions to dicts."""
+    if isinstance(obj, str):
+        return obj
+    if isinstance(obj, Mapping) and not isinstance(obj, (str, bytes)):
+        return _serialize_mapping_for_spans(obj)
+    return safe_serialize_observation(obj)
 
 
 def serialize_message(message: Any) -> dict[str, Any]:
