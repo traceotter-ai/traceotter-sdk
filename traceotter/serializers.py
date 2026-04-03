@@ -11,6 +11,33 @@ def safe_json_dumps(value: Any) -> str:
         return json.dumps({"unserializable": str(value)}, ensure_ascii=True)
 
 
+def safe_serialize_observation(obj: Any) -> str:
+    """Serialize LangChain / runtime values to a JSON string for span attributes."""
+    if obj is None:
+        return "null"
+    model_dump = getattr(obj, "model_dump", None)
+    if callable(model_dump):
+        try:
+            return json.dumps(model_dump(), ensure_ascii=True, default=str)
+        except (TypeError, ValueError):
+            pass
+    dict_method = getattr(obj, "dict", None)
+    if callable(dict_method):
+        try:
+            return json.dumps(dict_method(), ensure_ascii=True, default=str)
+        except (TypeError, ValueError):
+            pass
+    if hasattr(obj, "__dict__"):
+        try:
+            return json.dumps(obj.__dict__, ensure_ascii=True, default=str)
+        except (TypeError, ValueError):
+            pass
+    try:
+        return json.dumps(obj, ensure_ascii=True, default=str)
+    except (TypeError, ValueError):
+        return str(obj)
+
+
 def serialize_message(message: Any) -> dict[str, Any]:
     return {
         "role": getattr(message, "type", None) or getattr(message, "role", None),
