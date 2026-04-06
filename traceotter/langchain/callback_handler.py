@@ -15,8 +15,8 @@ from traceotter._utils.serializer import (
     parse_usage,
     safe_json_dumps,
     safe_serialize_observation,
-    serialize_documents,
     serialize_dict,
+    serialize_documents,
     serialize_messages_batch,
     to_gen_ai_usage_attributes,
 )
