@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Run Ruff lint (with fixes) and format before push — same checks as .github/workflows/lint.yml
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+run_ruff() {
+  if command -v ruff >/dev/null 2>&1; then
+    ruff "$@"
+  else
+    python3 -m ruff "$@"
+  fi
+}
+
+if ! run_ruff --version >/dev/null 2>&1; then
+  echo "pre-push: ruff not found. Install dev dependencies from pyproject.toml (e.g. uv sync --group dev)." >&2
+  exit 1
+fi
+
+echo "pre-push: running ruff check --fix and ruff format..."
+run_ruff check . --fix
+run_ruff format .
+
+if ! run_ruff check .; then
+  echo "pre-push: ruff check failed." >&2
+  exit 1
+fi
+
+if ! run_ruff format --check .; then
+  echo "pre-push: ruff format --check failed." >&2
+  exit 1
+fi
+
+# Only tracked-file changes (ignore untracked); Ruff only touches tracked Python, etc.
+if ! git diff --quiet HEAD; then
+  echo "" >&2
+  echo "pre-push: Ruff updated tracked files. Stage and commit the changes, then push again." >&2
+  git status --short >&2
+  exit 1
+fi
