@@ -9,19 +9,19 @@ The TraceOtter Python SDK for LLM/agent observability.
 
 It records traces for chains, tools, retrieval, and generations, and sends them to TraceOtter.
 
-Built with batching, retries, and flush-on-exit to help you debug, monitor, and track quality and cost over time.
-
 ## Installation
 
 Requires **Python 3.11+** (see `requires-python` in `pyproject.toml`).
 
 ```bash
-pip install traceotter
+pip install traceotter python-dotenv
 ```
 
 ## Quick Start (LangChain)
 
 ### 1) Configure credentials
+
+Set variables in the shell, or put them in a `.env` file in your project root (for example `TRACEOTTER_API_KEY=...` and optionally `TRACEOTTER_HOST=...`).
 
 ```bash
 export TRACEOTTER_API_KEY="to_your_api_key"
@@ -31,9 +31,12 @@ export TRACEOTTER_HOST="https://api.traceotter.com"  # optional
 ### 2) Attach TraceOtter callback to your chain/agent
 
 ```python
+from dotenv import load_dotenv
 from traceotter import get_client
 from traceotter.langchain import CallbackHandler
 from langchain_openai import ChatOpenAI
+
+load_dotenv()
 
 # Singleton client with background batching + flush
 client = get_client()
@@ -50,12 +53,15 @@ print(result.content)
 ## Real Agent Example (Tool + ReAct)
 
 ```python
+from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_core.tools import tool
 
 from traceotter.langchain import CallbackHandler
+
+load_dotenv()
 
 @tool
 def add_numbers(expression: str) -> int:
